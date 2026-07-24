@@ -58,6 +58,18 @@ const projectSchema = new mongoose.Schema({
 
 const Project = mongoose.model('Project', projectSchema);
 
+const skillCategorySchema = new mongoose.Schema({
+  category: { type: String, required: true },
+  icon: { type: String, required: true },
+  items: [{
+    name: { type: String, required: true },
+    icon: { type: String, required: true },
+    color: { type: String, default: "" }
+  }]
+}, { timestamps: true });
+
+const SkillCategory = mongoose.model('SkillCategory', skillCategorySchema);
+
 // ==========================================
 // Base Routes & APIs
 // ==========================================
@@ -100,6 +112,44 @@ app.delete('/api/projects/:id', async (req, res) => {
     res.json({ message: 'Project deleted successfully' });
   } catch (error) {
     res.status(400).json({ error: 'Failed to delete project' });
+  }
+});
+
+// -- Skills API --
+app.get('/api/skills', async (req, res) => {
+  try {
+    const skills = await SkillCategory.find();
+    res.json(skills);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch skills' });
+  }
+});
+
+app.post('/api/skills', async (req, res) => {
+  try {
+    const newSkill = new SkillCategory(req.body);
+    const savedSkill = await newSkill.save();
+    res.status(201).json(savedSkill);
+  } catch (error) {
+    res.status(400).json({ error: 'Failed to create skill category' });
+  }
+});
+
+app.patch('/api/skills/:id', async (req, res) => {
+  try {
+    const updatedSkill = await SkillCategory.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    res.json(updatedSkill);
+  } catch (error) {
+    res.status(400).json({ error: 'Failed to update skill category' });
+  }
+});
+
+app.delete('/api/skills/:id', async (req, res) => {
+  try {
+    await SkillCategory.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Skill category deleted successfully' });
+  } catch (error) {
+    res.status(400).json({ error: 'Failed to delete skill category' });
   }
 });
 
