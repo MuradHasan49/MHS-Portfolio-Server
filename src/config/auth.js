@@ -16,5 +16,5 @@ export const auth = betterAuth({
     },
     secret: process.env.BETTER_AUTH_SECRET || "super_secret_dev_key",
     baseURL: process.env.BETTER_AUTH_URL || "http://localhost:5000",
-    trustedOrigins: ["http://localhost:3000"],
+    trustedOrigins: ["http://localhost:3000", "https://muradhasan49.vercel.app"],
 });
