@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import multer from 'multer';
+import nodemailer from 'nodemailer';
 import { toNodeHandler } from "better-auth/node";
 import { auth } from './auth.js';
 
@@ -117,7 +118,7 @@ const Settings = mongoose.model('Settings', settingsSchema);
 // Base Routes & APIs
 // ==========================================
 app.get('/', (req, res) => {
-  res.send('MHS Portfolio Backend is running!');
+  res.send('MHS Portfolio Backend is running! ☠');
 });
 
 // -- Projects API --
@@ -149,6 +150,15 @@ app.patch('/api/projects/:id', async (req, res) => {
   }
 });
 
+app.get('/api/projects/:id', async (req, res) => {
+  try {
+    const project = await Project.findById(req.params.id);
+    if (!project) return res.status(404).json({ error: 'Project not found' });
+    res.json(project);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch project' });
+  }
+});
 app.delete('/api/projects/:id', async (req, res) => {
   try {
     await Project.findByIdAndDelete(req.params.id);
@@ -333,6 +343,56 @@ app.post('/api/upload', upload.single('image'), async (req, res) => {
   } catch (error) {
     console.error('Upload Error:', error);
     res.status(500).json({ error: 'Failed to upload image' });
+  }
+});
+
+// ==========================================
+// Contact Form API
+// ==========================================
+app.post('/api/contact', async (req, res) => {
+  try {
+    const { name, email, subject, message } = req.body;
+    
+    if (!name || !email || !message) {
+      return res.status(400).json({ error: "Name, email, and message are required" });
+    }
+
+    if (!process.env.EMAIL_USER || process.env.EMAIL_USER === 'your_gmail_address@gmail.com') {
+      return res.status(500).json({ error: "Email configuration is missing in backend/.env" });
+    }
+
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+      }
+    });
+
+    const mailOptions = {
+      from: `"${name}" <${process.env.EMAIL_USER}>`,
+      replyTo: email,
+      to: process.env.EMAIL_RECEIVER || process.env.EMAIL_USER,
+      subject: `Portfolio Contact: ${subject || 'New Message from ' + name}`,
+      text: `You have received a new message from your portfolio contact form.\n\nName: ${name}\nEmail: ${email}\n\nMessage:\n${message}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; padding: 20px; color: #333; line-height: 1.6;">
+          <h2 style="color: #000;">New Contact Form Message</h2>
+          <p><strong>Name:</strong> ${name}</p>
+          <p><strong>Email:</strong> <a href="mailto:${email}">${email}</a></p>
+          <p><strong>Subject:</strong> ${subject || 'N/A'}</p>
+          <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
+          <h3 style="margin-bottom: 10px;">Message:</h3>
+          <p style="white-space: pre-wrap; background: #f9f9f9; padding: 15px; border-radius: 5px;">${message}</p>
+        </div>
+      `
+    };
+
+    await transporter.sendMail(mailOptions);
+    res.status(200).json({ success: true, message: "Message sent successfully" });
+  } catch (error) {
+    console.error("Nodemailer error:", error);
+    res.status(500).json({ error: "Failed to send message" });
   }
 });
 
