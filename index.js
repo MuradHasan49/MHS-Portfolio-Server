@@ -39,10 +39,68 @@ mongoose.connect(process.env.MONGODB_URI)
   .catch((err) => console.error('❌ MongoDB Connection Error:', err));
 
 // ==========================================
-// Base Routes
+// Mongoose Models
+// ==========================================
+const projectSchema = new mongoose.Schema({
+  slug: { type: String, required: true, unique: true },
+  title: { type: String, required: true },
+  description: { type: String, required: true },
+  fullDescription: { type: String, required: true },
+  image: { type: String, required: true },
+  github: { type: String, required: true },
+  live: { type: String, required: true },
+  tags: { type: [String], default: [] },
+  techStack: { type: [String], default: [] },
+  contributions: { type: [String], default: [] },
+  challenges: { type: [String], default: [] },
+  futurePlans: { type: [String], default: [] },
+}, { timestamps: true });
+
+const Project = mongoose.model('Project', projectSchema);
+
+// ==========================================
+// Base Routes & APIs
 // ==========================================
 app.get('/', (req, res) => {
   res.send('MHS Portfolio Backend is running!');
+});
+
+// -- Projects API --
+app.get('/api/projects', async (req, res) => {
+  try {
+    const projects = await Project.find().sort({ createdAt: -1 });
+    res.json(projects);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch projects' });
+  }
+});
+
+app.post('/api/projects', async (req, res) => {
+  try {
+    const newProject = new Project(req.body);
+    const savedProject = await newProject.save();
+    res.status(201).json(savedProject);
+  } catch (error) {
+    res.status(400).json({ error: 'Failed to create project' });
+  }
+});
+
+app.patch('/api/projects/:id', async (req, res) => {
+  try {
+    const updatedProject = await Project.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    res.json(updatedProject);
+  } catch (error) {
+    res.status(400).json({ error: 'Failed to update project' });
+  }
+});
+
+app.delete('/api/projects/:id', async (req, res) => {
+  try {
+    await Project.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Project deleted successfully' });
+  } catch (error) {
+    res.status(400).json({ error: 'Failed to delete project' });
+  }
 });
 
 // ==========================================
