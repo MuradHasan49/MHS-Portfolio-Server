@@ -2,6 +2,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import multer from 'multer';
 import { toNodeHandler } from "better-auth/node";
 import { auth } from './auth.js';
 
@@ -22,12 +23,12 @@ app.use(express.json());
 // Authentication (Better Auth)
 // ==========================================
 // Disable public registration
-app.post("/api/auth/sign-up/*", (req, res) => {
+app.post(["/api/auth/sign-up", "/api/auth/sign-up/email"], (req, res) => {
   res.status(403).json({ error: "Registration is disabled for security." });
 });
 
 // Mount Better Auth handler
-app.all("/api/auth/*", (req, res) => {
+app.use("/api/auth", (req, res) => {
   return toNodeHandler(auth)(req, res);
 });
 
@@ -296,6 +297,42 @@ app.patch('/api/settings', async (req, res) => {
     res.json(settings);
   } catch (error) {
     res.status(400).json({ error: 'Failed to update settings' });
+  }
+});
+
+// -- Upload API (ImgBB) --
+const upload = multer({ storage: multer.memoryStorage() });
+
+app.post('/api/upload', upload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No image uploaded' });
+    }
+    
+    if (!process.env.IMGBB_API_KEY) {
+      return res.status(500).json({ error: 'IMGBB_API_KEY is not configured in backend/.env' });
+    }
+
+    const base64Image = req.file.buffer.toString('base64');
+    const formData = new FormData();
+    formData.append('image', base64Image);
+
+    const imgbbRes = await fetch(`https://api.imgbb.com/1/upload?key=${process.env.IMGBB_API_KEY}`, {
+      method: 'POST',
+      body: formData,
+    });
+
+    const data = await imgbbRes.json();
+
+    if (data.success) {
+      res.json({ url: data.data.url });
+    } else {
+      console.error('ImgBB API Error:', data);
+      res.status(500).json({ error: 'ImgBB upload failed' });
+    }
+  } catch (error) {
+    console.error('Upload Error:', error);
+    res.status(500).json({ error: 'Failed to upload image' });
   }
 });
 
