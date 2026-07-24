@@ -98,6 +98,20 @@ const experienceSchema = new mongoose.Schema({
 
 const Experience = mongoose.model('Experience', experienceSchema);
 
+const settingsSchema = new mongoose.Schema({
+  github: { type: String, default: "" },
+  linkedin: { type: String, default: "" },
+  facebook: { type: String, default: "" },
+  email: { type: String, default: "" },
+  resume: { type: String, default: "" },
+  heroTitle: { type: String, default: "" },
+  heroSubtitle: { type: String, default: "" },
+  heroDescription: { type: String, default: "" },
+  profileImage: { type: String, default: "" },
+}, { timestamps: true });
+
+const Settings = mongoose.model('Settings', settingsSchema);
+
 // ==========================================
 // Base Routes & APIs
 // ==========================================
@@ -254,6 +268,34 @@ app.delete('/api/experience/:id', async (req, res) => {
     res.json({ message: 'Experience record deleted successfully' });
   } catch (error) {
     res.status(400).json({ error: 'Failed to delete experience record' });
+  }
+});
+
+// -- Settings API --
+app.get('/api/settings', async (req, res) => {
+  try {
+    let settings = await Settings.findOne();
+    if (!settings) {
+      settings = await Settings.create({});
+    }
+    res.json(settings);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch settings' });
+  }
+});
+
+app.patch('/api/settings', async (req, res) => {
+  try {
+    let settings = await Settings.findOne();
+    if (!settings) {
+      settings = new Settings(req.body);
+      await settings.save();
+    } else {
+      settings = await Settings.findByIdAndUpdate(settings._id, req.body, { new: true });
+    }
+    res.json(settings);
+  } catch (error) {
+    res.status(400).json({ error: 'Failed to update settings' });
   }
 });
 
