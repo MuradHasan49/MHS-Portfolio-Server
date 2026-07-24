@@ -40,6 +40,10 @@ app.use("/api/auth", (req, res) => {
 });
 
 // API Routes
+app.get("/", (req, res) => {
+  res.json({ message: "MHS Portfolio API is running perfectly! 🚀" });
+});
+
 app.use("/api/projects", projectRoutes);
 app.use("/api/skills", skillRoutes);
 app.use("/api/education", educationRoutes);
