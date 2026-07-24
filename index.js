@@ -85,6 +85,19 @@ const educationSchema = new mongoose.Schema({
 
 const Education = mongoose.model('Education', educationSchema);
 
+const experienceSchema = new mongoose.Schema({
+  title: { type: String, required: true },
+  company: { type: String, required: true },
+  location: { type: String, required: true },
+  period: { type: String, required: true },
+  type: { type: String, required: true },
+  image: { type: String, required: true },
+  certificateUrl: { type: String },
+  description: { type: [String], default: [] }
+}, { timestamps: true });
+
+const Experience = mongoose.model('Experience', experienceSchema);
+
 // ==========================================
 // Base Routes & APIs
 // ==========================================
@@ -203,6 +216,44 @@ app.delete('/api/education/:id', async (req, res) => {
     res.json({ message: 'Education record deleted successfully' });
   } catch (error) {
     res.status(400).json({ error: 'Failed to delete education record' });
+  }
+});
+
+// -- Experience API --
+app.get('/api/experience', async (req, res) => {
+  try {
+    const experience = await Experience.find();
+    res.json(experience);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch experience records' });
+  }
+});
+
+app.post('/api/experience', async (req, res) => {
+  try {
+    const newExp = new Experience(req.body);
+    const savedExp = await newExp.save();
+    res.status(201).json(savedExp);
+  } catch (error) {
+    res.status(400).json({ error: 'Failed to create experience record' });
+  }
+});
+
+app.patch('/api/experience/:id', async (req, res) => {
+  try {
+    const updatedExp = await Experience.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    res.json(updatedExp);
+  } catch (error) {
+    res.status(400).json({ error: 'Failed to update experience record' });
+  }
+});
+
+app.delete('/api/experience/:id', async (req, res) => {
+  try {
+    await Experience.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Experience record deleted successfully' });
+  } catch (error) {
+    res.status(400).json({ error: 'Failed to delete experience record' });
   }
 });
 
