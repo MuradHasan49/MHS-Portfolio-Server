@@ -35,7 +35,7 @@ app.use(express.json());
 app.post(["/api/auth/sign-up", "/api/auth/sign-up/email"], (req, res) => {
   res.status(403).json({ error: "Registration is disabled for security." });
 });
-app.all("/api/auth/*", (req, res) => {
+app.all(/^\/api\/auth/, (req, res) => {
   return toNodeHandler(auth)(req, res);
 });
 
