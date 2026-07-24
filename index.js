@@ -124,7 +124,7 @@ app.get('/', (req, res) => {
 // -- Projects API --
 app.get('/api/projects', async (req, res) => {
   try {
-    const projects = await Project.find().sort({ createdAt: -1 });
+    const projects = await Project.find().sort({ _id: -1 });
     res.json(projects);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch projects' });
@@ -137,7 +137,7 @@ app.post('/api/projects', async (req, res) => {
     const savedProject = await newProject.save();
     res.status(201).json(savedProject);
   } catch (error) {
-    res.status(400).json({ error: 'Failed to create project' });
+    res.status(400).json({ error: error.message || 'Failed to create project' });
   }
 });
 
@@ -157,6 +157,16 @@ app.get('/api/projects/:id', async (req, res) => {
     res.json(project);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch project' });
+  }
+});
+
+app.get('/api/projects/slug/:slug', async (req, res) => {
+  try {
+    const project = await Project.findOne({ slug: req.params.slug });
+    if (!project) return res.status(404).json({ error: 'Project not found' });
+    res.json(project);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch project by slug' });
   }
 });
 app.delete('/api/projects/:id', async (req, res) => {
