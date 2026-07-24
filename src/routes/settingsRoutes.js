@@ -15,7 +15,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.post("/", async (req, res) => {
+router.patch("/", async (req, res) => {
   try {
     let settings = await Settings.findOne();
     if (settings) {

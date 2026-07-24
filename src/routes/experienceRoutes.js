@@ -22,7 +22,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.put("/:id", async (req, res) => {
+router.patch("/:id", async (req, res) => {
   try {
     const updatedExp = await Experience.findByIdAndUpdate(
       req.params.id,
