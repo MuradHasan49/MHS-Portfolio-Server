@@ -6,7 +6,7 @@ const educationSchema = new mongoose.Schema({
   duration: { type: String, required: true },
   degree: { type: String, required: true },
   grade: { type: String, required: true },
-  image: { type: String, required: true },
+  image: { type: String, default: "" },
   resultUrl: { type: String },
   coursework: { type: [String], default: [] },
   subjects: { type: [String], default: [] },

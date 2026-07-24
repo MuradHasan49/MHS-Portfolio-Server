@@ -6,7 +6,7 @@ const experienceSchema = new mongoose.Schema({
   location: { type: String, required: true },
   period: { type: String, required: true },
   type: { type: String, required: true },
-  image: { type: String, required: true },
+  image: { type: String, default: "" },
   certificateUrl: { type: String },
   description: { type: [String], default: [] }
 }, { timestamps: true });
