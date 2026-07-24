@@ -70,6 +70,21 @@ const skillCategorySchema = new mongoose.Schema({
 
 const SkillCategory = mongoose.model('SkillCategory', skillCategorySchema);
 
+const educationSchema = new mongoose.Schema({
+  school: { type: String, required: true },
+  location: { type: String, required: true },
+  duration: { type: String, required: true },
+  degree: { type: String, required: true },
+  grade: { type: String, required: true },
+  image: { type: String, required: true },
+  resultUrl: { type: String },
+  coursework: { type: [String], default: [] },
+  subjects: { type: [String], default: [] },
+  description: { type: String, required: true }
+}, { timestamps: true });
+
+const Education = mongoose.model('Education', educationSchema);
+
 // ==========================================
 // Base Routes & APIs
 // ==========================================
@@ -150,6 +165,44 @@ app.delete('/api/skills/:id', async (req, res) => {
     res.json({ message: 'Skill category deleted successfully' });
   } catch (error) {
     res.status(400).json({ error: 'Failed to delete skill category' });
+  }
+});
+
+// -- Education API --
+app.get('/api/education', async (req, res) => {
+  try {
+    const education = await Education.find();
+    res.json(education);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch education records' });
+  }
+});
+
+app.post('/api/education', async (req, res) => {
+  try {
+    const newEdu = new Education(req.body);
+    const savedEdu = await newEdu.save();
+    res.status(201).json(savedEdu);
+  } catch (error) {
+    res.status(400).json({ error: 'Failed to create education record' });
+  }
+});
+
+app.patch('/api/education/:id', async (req, res) => {
+  try {
+    const updatedEdu = await Education.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    res.json(updatedEdu);
+  } catch (error) {
+    res.status(400).json({ error: 'Failed to update education record' });
+  }
+});
+
+app.delete('/api/education/:id', async (req, res) => {
+  try {
+    await Education.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Education record deleted successfully' });
+  } catch (error) {
+    res.status(400).json({ error: 'Failed to delete education record' });
   }
 });
 
