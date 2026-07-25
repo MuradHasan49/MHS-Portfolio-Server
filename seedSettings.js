@@ -11,6 +11,7 @@ const settingsSchema = new mongoose.Schema({
   github: { type: String, default: "" },
   linkedin: { type: String, default: "" },
   facebook: { type: String, default: "" },
+  twitter: { type: String, default: "" },
   email: { type: String, default: "" },
   resume: { type: String, default: "" },
   heroTitle: { type: String, default: "" },
@@ -34,8 +35,9 @@ async function seed() {
     
     await Settings.create({
       github: "https://github.com/MuradHasan49",
-      linkedin: "https://www.linkedin.com/in/murad-hasan-1a3b1a208/",
+      linkedin: "https://www.linkedin.com/in/muradhasan49",
       facebook: "https://www.facebook.com/m.h.shadhin.18/",
+      twitter: "",
       email: "muradhassan649@gmail.com",
       resume: "/assets/files/Murad_hasan_Resume_Frontend_Developer.pdf",
       heroTitle: "Murad Hasan",
